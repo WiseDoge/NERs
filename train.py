@@ -1,11 +1,7 @@
 from util import *
 from config import *
-from model import *
-import torch.optim as optim
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
-                              TensorDataset)
+from tagger import *
+
 import os
 import logging
 

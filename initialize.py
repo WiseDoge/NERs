@@ -1,6 +1,7 @@
 from util import load_data
 from config import *
 import pickle
+import os
 
 
 def gen_dict(data, word_to_ix, tag_to_ix):
@@ -22,11 +23,19 @@ def build_dict(datas):
         pickle.dump(tag_to_ix, f)
 
 
+def create_output_dir():
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+    if not os.path.exists(EVAL_LOG_DIR):
+        os.makedirs(EVAL_LOG_DIR)
+
+
 def main():
     train_data = load_data(TRAIN_FILE_NAME)
     dev_data = load_data(DEV_FILE_NAME)
     test_data = load_data(TEST_FILE_NAME)
     build_dict([train_data, dev_data, test_data])
+    create_output_dir()
 
 
 if __name__ == "__main__":

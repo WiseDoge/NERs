@@ -28,6 +28,7 @@ Some Chinese named entity recognition(NER) algorithms.
 风	O
 生	O 
 ```
+如果使用自己的数据集，只需将其格式化为上段所示的可是即可。
 
 ## Usage
 * 修改配置文件 `config.py` (optional)
@@ -53,19 +54,19 @@ python train.py
 python eval.py
 ```
 ## Results
-|                     | Precision | Recall | F1-Score |
-| ------------------- | --------- | ------ | -------- |
-| Logistic Regression | 0.7544    | 0.7634 | 0.7557   |
-| HMM                 | 0.9207    | 0.9015 | 0.9095   |
-| CNN                 | 0.9160    | 0.9158 | 0.9153   |
-| BiLSTM              | 0.9546    | 0.9544 | 0.9542   |
-| BiLSTM+Attention    | 0.9578    | 0.9577 | 0.9576   |
-| BiLSTM+CNN          | 0.9571    | 0.957  | 0.9569   |
-| CNN+BiLSTM          | 0.9584    | 0.9583 | 0.9579   |
-| CNN+BiLSTM+Att      | 0.96      | 0.9598 | 0.9597   |
-| ~~CRF~~             |           |        |          |
-| ~~BiLSTM-CRF~~      |           |        |          |
-| ~~BiLSTM-CNN-CRF~~  |           |        |          |
+|                      | Precision | Recall | F1-Score |
+| -------------------- | --------- | ------ | -------- |
+| Logistic Regression  | 0.7544    | 0.7634 | 0.7557   |
+| HMM                  | 0.9207    | 0.9015 | 0.9095   |
+| CNN                  | 0.9160    | 0.9158 | 0.9153   |
+| BiLSTM               | 0.9546    | 0.9544 | 0.9542   |
+| BiLSTM+Attention     | 0.9578    | 0.9577 | 0.9576   |
+| BiLSTM+CNN           | 0.9571    | 0.957  | 0.9569   |
+| CNN+BiLSTM           | 0.9584    | 0.9583 | 0.9579   |
+| CNN+BiLSTM+Attention | 0.9615    | 0.9613 | 0.9612   |
+| ~~CRF~~              |           |        |          |
+| ~~BiLSTM-CRF~~       |           |        |          |
+| ~~BiLSTM-CNN-CRF~~   |           |        |          |
 
 ## Getting Started
 Waiting

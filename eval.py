@@ -1,15 +1,11 @@
-import os
-from config import *
-from model import *
+from tagger import *
 from util import *
 import pandas as pd
-import pickle
-from collections import defaultdict
-import logging
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, precision_score, recall_score, f1_score
 
+import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -64,7 +60,7 @@ def evaluate(datas, tagger, device, tag_to_ix):
 
     df = pre_recall_f1_sup(tags, pred_tags, labels, prfsname)
     confu_matrix(tags, pred_tags, labels, cnfumatname)
-    
+
     return df.loc['Mean/Total'][:-1]
 
 

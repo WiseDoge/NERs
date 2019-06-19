@@ -39,7 +39,7 @@ def convert_tokens_to_ids(datas, maxlen, word_to_ix, tag_to_ix=None):
         for j in range(len(line)):
             word, pos = line[j]
             if tag_to_ix:
-                dataset[i, j, 0] = word_to_ix[word]
+                dataset[i, j, 0] = word_to_ix[word] if word in word_to_ix else word_to_ix['[UNK]']
                 dataset[i, j, 1] = tag_to_ix[pos]
             else:
                 dataset[i, j] = word_to_ix[word]
@@ -52,12 +52,3 @@ def convert_tokens_to_ids(datas, maxlen, word_to_ix, tag_to_ix=None):
     return dataset.long()
 
 
-if __name__ == "__main__":
-    sent = ['Li', 'Youbin', 'starred', 'in', 'the', 'liang', 'jian']
-    tags = ['I-PER', 'I-PER', 'O', 'O', 'O', 'I-TV', 'I-TV']
-    print(extra_entity(sent, tags))
-    sent = ['A', 'A', 'A', 'B', 'B', 'C']
-    tags = ['I-PER', 'I-PER', 'B-PER', 'I-PER', 'O']
-    print(extra_entity(sent, tags))
-    tags = ['I-PER', 'I-PER', 'I-T', 'I-T', 'I-T', 'I-M']
-    print(extra_entity(sent, tags))
