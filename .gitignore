@@ -2,7 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.vscode
+.idea
+old.bak
+output/
+data/CoNLL-2003
+evallog/
 # C extensions
 *.so
 
