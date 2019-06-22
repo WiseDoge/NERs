@@ -31,11 +31,12 @@ def create_output_dir():
 
 
 def main():
+    create_output_dir()
     train_data = load_data(TRAIN_FILE_NAME)
     dev_data = load_data(DEV_FILE_NAME)
     test_data = load_data(TEST_FILE_NAME)
     build_dict([train_data, dev_data, test_data])
-    create_output_dir()
+
 
 
 if __name__ == "__main__":
