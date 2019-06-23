@@ -1,10 +1,18 @@
+from typing import List, Dict, Optional, Tuple, Mapping
 import torch
 import os
 import pickle
 from config import *
 
 
-def load_dict():
+def load_dict() -> Tuple[Dict[str, int], Dict[str, int]]:
+    """Load vocab and tag dict from file.
+
+    The type of dict is python dict object.
+
+    Returns:
+        vocab dict, tag dict
+    """
     with open(os.path.join(OUTPUT_DIR, 'word_to_ix.dict'), "rb") as f:
         word_to_ix = pickle.load(f)
     with open(os.path.join(OUTPUT_DIR, 'tag_to_ix.dict'), "rb") as f:
@@ -12,7 +20,23 @@ def load_dict():
     return word_to_ix, tag_to_ix
 
 
-def load_data(filename):
+def load_data(filename:str) -> List[List[str]]:
+    """Load data from file
+
+    This function only read the first and last column of input file.
+
+    File format:
+        sent1word1 [sent1word1 attr1] ... [sent1word1 attr_n] sent1tag1
+        sent1word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent1tag2
+        sent1word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent1tag2
+
+        sent2word1 [sent1word1 attr1] ... [sent1word1 attr_n] sent2tag1
+        sent2word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent2tag2
+
+        sent3word1 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag1
+        sent3word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag2
+        sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
+    """
     datas = []
     lst = []
     with open(filename, 'r', encoding='utf-8') as f:
@@ -24,11 +48,14 @@ def load_data(filename):
                 lst = []
             else:
                 line = line.split()
-                lst.append(line)
+                lst.append([line[0], line[-1]])
     return datas
 
 
-def convert_tokens_to_ids(datas, maxlen, word_to_ix, tag_to_ix=None):
+def convert_tokens_to_ids(datas:List[List[str]], 
+                          maxlen:int, 
+                          word_to_ix:Mapping[str, int], 
+                          tag_to_ix: Optional[Mapping[str, int]]=None) -> torch.LongTensor:
     if tag_to_ix:
         dataset = torch.zeros(len(datas), maxlen, 2)
     else:

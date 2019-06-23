@@ -64,13 +64,10 @@ python eval.py
 | BiLSTM+CNN           | 0.9571    | 0.957  | 0.9569   |
 | CNN+BiLSTM           | 0.9584    | 0.9583 | 0.9579   |
 | CNN+BiLSTM+Attention | 0.9615    | 0.9613 | 0.9612   |
-| ~~CRF~~              |           |        |          |
-| ~~BiLSTM-CRF~~       |           |        |          |
-| ~~BiLSTM-CNN-CRF~~   |           |        |          |
+| BiLSTM+CRF           | 0.9573    | 0.9572 | 0.9569   |
 
 ## Getting Started
 Waiting
 
 ## TODO
-* 增加 CRF 模型及其与其他模型的混搭。
 * 增加 Ensemble。

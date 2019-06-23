@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 .vscode
 .idea
+demo.py
+third_party.py
+main.py
 old.bak
 output/
 data/CoNLL-2003

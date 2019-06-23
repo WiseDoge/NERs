@@ -4,15 +4,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, precision_score, recall_score, f1_score
-
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
 def pre_recall_f1_sup(y_true, y_pred, labels, fname):
     mat = precision_recall_fscore_support(y_true, y_pred, labels=labels)
-    mat = {"Precision": mat[0], "Recall": mat[1], "F1-Score": mat[2], "Support": mat[3]}
+    mat = {"Precision": mat[0], "Recall": mat[1],
+           "F1-Score": mat[2], "Support": mat[3]}
     df = pd.DataFrame(mat, index=labels)
     df = df[df.Support > 0]
 
@@ -70,7 +72,8 @@ def main():
     word_to_ix, tag_to_ix = load_dict()
 
     logger.info(f"***** Generating Testing Data *****")
-    test_dataset = convert_tokens_to_ids(test_data, MAX_LEN, word_to_ix, tag_to_ix)
+    test_dataset = convert_tokens_to_ids(
+        test_data, MAX_LEN, word_to_ix, tag_to_ix)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -81,6 +84,7 @@ def main():
         HMMTagger(len(word_to_ix), len(tag_to_ix)),
         CNNTagger(*params, device=device),
         BiLSTMTagger(*params, device=device),
+        BiLSTMCRFTagger(*params, device=device),
         BiLSTMAttTagger(*params, word_to_ix['[PAD]'], device=device),
         BiLSTMCNNTagger(*params, device=device),
         CNNBiLSTMTagger(*params, device=device),

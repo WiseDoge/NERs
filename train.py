@@ -5,7 +5,8 @@ from tagger import *
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -17,10 +18,12 @@ def main():
     word_to_ix, tag_to_ix = load_dict()
 
     logger.info(f"***** Generating Training Data *****")
-    train_dataset = convert_tokens_to_ids(train_data, MAX_LEN, word_to_ix, tag_to_ix)
+    train_dataset = convert_tokens_to_ids(
+        train_data, MAX_LEN, word_to_ix, tag_to_ix)
 
     tag_dim = len(tag_to_ix)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cpu")
 
     logger.info(f"***** Initializing Model *****")
     params = [len(word_to_ix), WORD_EMBEDDING_DIM, HIDDEN_DIM, tag_dim,
@@ -30,6 +33,7 @@ def main():
         HMMTagger(len(word_to_ix), tag_dim, tag_to_ix['[PAD]']),
         CNNTagger(*params),
         BiLSTMTagger(*params),
+        BiLSTMCRFTagger(*params[:-1], word_to_ix['[PAD]'], params[-1]),
         BiLSTMAttTagger(*params[:-1], word_to_ix['[PAD]'], params[-1]),
         BiLSTMCNNTagger(*params),
         CNNBiLSTMTagger(*params),
