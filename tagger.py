@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from model import *
-
+import os
 import logging
 
 logging.basicConfig(level=logging.INFO,
@@ -64,6 +64,9 @@ class TorchTagger(object):
         return self.predict(X).squeeze()
 
     def save(self, filename: str):
+        dirname, _ = os.path.split(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
         torch.save(self.model.state_dict(), filename)
 
     def load(self, filename: str):
@@ -219,7 +222,7 @@ class HMMTagger(object):
         self.pi /= self.pi.sum()
 
         for i in range(y.shape[0]):
-            for j in range(y.shape[1]):
+            for j in range(y.shape[1] - 1):
                 self.obprob[y[i, j], X[i, j]] += 1
                 if y[i, j + 1] == self.tag_pad_ix:
                     break
@@ -266,6 +269,9 @@ class HMMTagger(object):
         return torch.stack([self.predict_one(seq) for seq in X])
 
     def save(self, filename: str):
+        dirname, _ = os.path.split(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
         pi = self.pi.view(-1, 1)
         mat = torch.cat([pi, self.trans, self.obprob], dim=-1)
         torch.save(mat, filename)

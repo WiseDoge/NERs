@@ -1,16 +1,19 @@
-# ChineseNER
-Some Chinese named entity recognition(NER) algorithms.
+# NERs
+Some basic NER algorithms common in both Chinese and English.
 ## Dependencies
 * Python 3.6+
 * PyTorch 0.4+
 * NumPy
-* Pandas 
-* Matplotlib
-* Seaborn
-* Sklearn
-## Dataset
+* Pandas  （友好显示表格数据）
+* Matplotlib （画混淆矩阵）
+* Seaborn （画混淆矩阵）
+* Sklearn （计算P，R，F1）    
 
-数据集用的是论文ACL 2018[Chinese NER using Lattice LSTM](https://github.com/jiesutd/LatticeLSTM)中收集的简历数据，数据的格式如下，它的每一行由一个字及其对应的标注组成，标注集采用BIOES，句子之间用一个空行隔开。
+安装依赖  
+```pip install -r requirements.txt```
+## Dataset
+### Resume Data
+选自论文ACL 2018[Chinese NER using Lattice LSTM](https://github.com/jiesutd/LatticeLSTM)中收集的简历数据，数据的格式如下，它的每一行由一个字及其对应的标注组成，标注集采用BIOES，句子之间用一个空行隔开。
 
 ```
 美	B-LOC
@@ -28,32 +31,61 @@ Some Chinese named entity recognition(NER) algorithms.
 风	O
 生	O 
 ```
-如果使用自己的数据集，只需将其格式化为上段所示的可是即可。
+### CoNLL 2003
+```
+EU NNP B-NP B-ORG
+rejects VBZ B-VP O
+German JJ B-NP B-MISC
+call NN I-NP O
+to TO B-VP O
+boycott VB I-VP O
+British JJ B-NP B-MISC
+lamb NN I-NP O
+. . O O
+
+Peter NNP B-NP B-PER
+Blackburn NNP I-NP I-PER
+
+BRUSSELS NNP B-NP B-LOC
+1996-08-22 CD I-NP O
+```
+### Your Own Dataset
+请将你自己的数据集按照以下格式组织。
+
+```
+sent1word1 [sent1word1 attr1] ... [sent1word1 attr_n] sent1tag1
+sent1word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent1tag2
+sent1word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent1tag2
+
+sent2word1 [sent1word1 attr1] ... [sent1word1 attr_n] sent2tag1
+sent2word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent2tag2
+
+sent3word1 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag1
+sent3word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag2
+sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
+```
+本项目只会读取第一列（句子）和最后一列（NER标注）。
 
 ## Usage
-* 修改配置文件 `config.py` (optional)
-```python
-OUTPUT_DIR = 'output'
-DATA_DIR = 'data'
-EVAL_LOG_DIR = 'evallog'
-LEARNING_RATE = 0.001
-PRINT_STEP = 20
-......
-```
 
-* 生成词表
-```
-python initialize.py
-```
-* 训练并保存模型
-```
-python train.py
-```
-* 评估模型
-```
-python eval.py
-```
+### 在中文简历数据上进行训练和评估（此脚本 Windows/Linux 通用）  
+```$ resume_train_eval.bat``` 
+### 在 CoNLL 2003 数据上进行训练和评估（此脚本 Windows/Linux 通用）  
+```$ conll_train_eval.bat``` 
+### 在自己的数据集上进行训练和评估  
+* 生成词表   
+```python main.py --do_init --train_file=* --dev_file=* --test_file=* --word_dict_path=* --tag_dict_path=*```
+* 训练  
+```python main.py --do_train --output_dir=* --train_file=* --word_dict_path=* --tag_dict_path=*```  
+亦可自行指定学习率、epochs等参数。 
+* 评估  
+```python main.py --do_eval --test_file=* --word_dict_path=* --tag_dict_path=* --output_dir=* --eval_log_dir=*```  
+  
+标 `*` 的位置需要用户自行指定。
+
 ## Results
+评估的方法是对每一种标签分别求P，R，F1，然后再求加权平均。
+### Chinese Resume Data
 |                      | Precision | Recall | F1-Score |
 | -------------------- | --------- | ------ | -------- |
 | Logistic Regression  | 0.7544    | 0.7634 | 0.7557   |
@@ -65,9 +97,19 @@ python eval.py
 | CNN+BiLSTM           | 0.9584    | 0.9583 | 0.9579   |
 | CNN+BiLSTM+Attention | 0.9615    | 0.9613 | 0.9612   |
 | BiLSTM+CRF           | 0.9573    | 0.9572 | 0.9569   |
+### CoNLL2003 
+|                    | Precision | Recall | F1-Score |
+| ------------------ | --------- | ------ | -------- |
+| LRTagger           | 0.8865    | 0.8759 | 0.8803   |
+| HMMTagger          | 0.9547    | 0.7362 | 0.8231   |
+| CNNTagger          | 0.9111    | 0.9139 | 0.9119   |
+| BiLSTMTagger       | 0.9218    | 0.9236 | 0.922    |
+| BiLSTMCRFTagger    | 0.9209    | 0.9202 | 0.9202   |
+| BiLSTMAttTagger    | 0.9233    | 0.9279 | 0.9239   |
+| BiLSTMCNNTagger    | 0.9255    | 0.9286 | 0.9264   |
+| CNNBiLSTMTagger    | 0.9191    | 0.9217 | 0.9196   |
+| CNNBiLSTMAttTagger | 0.9164    | 0.9206 | 0.9176   |
 
-## Getting Started
-Waiting
 
 ## TODO
 * 增加 Ensemble。

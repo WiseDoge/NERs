@@ -1,10 +1,10 @@
 from tagger import *
-from util import *
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, precision_score, recall_score, f1_score
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -40,7 +40,7 @@ def confu_matrix(y_true, pred_tags, labels, fname):
     plt.savefig(fname, dpi=300)
 
 
-def evaluate(datas, tagger, device, tag_to_ix):
+def evaluate(datas, tagger, device, tag_to_ix, eval_log_dir):
     taggername = type(tagger).__name__
     logger.info(f"***** Evaluating {taggername} *****")
     ix_to_tag = {v: k for k, v in tag_to_ix.items()}
@@ -57,8 +57,10 @@ def evaluate(datas, tagger, device, tag_to_ix):
             pred_tags.append(ix_to_tag[pred[i].item()])
 
     labels = list(tag_to_ix.keys())
-    prfsname = os.path.join(EVAL_LOG_DIR, f"{taggername}_prfs.csv")
-    cnfumatname = os.path.join(EVAL_LOG_DIR, f"{taggername}_confu_mat.png")
+    if not os.path.exists(eval_log_dir):
+        os.makedirs(eval_log_dir)
+    prfsname = os.path.join(eval_log_dir, f"{taggername}_prfs.csv")
+    cnfumatname = os.path.join(eval_log_dir, f"{taggername}_confu_mat.png")
 
     df = pre_recall_f1_sup(tags, pred_tags, labels, prfsname)
     confu_matrix(tags, pred_tags, labels, cnfumatname)
@@ -66,25 +68,25 @@ def evaluate(datas, tagger, device, tag_to_ix):
     return df.loc['Mean/Total'][:-1]
 
 
-def main():
+def do_eval(test_filename, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, model_dir, eval_log_dir, device):
     logger.info(f"***** Loading Eval Data *****")
-    test_data = load_data(TEST_FILE_NAME)
-    word_to_ix, tag_to_ix = load_dict()
+    test_data = load_data(test_filename)
+    word_to_ix, tag_to_ix = load_dict(word_dict_path, tag_dict_path)
 
     logger.info(f"***** Generating Testing Data *****")
     test_dataset = convert_tokens_to_ids(
-        test_data, MAX_LEN, word_to_ix, tag_to_ix)
+        test_data, max_seq_len, word_to_ix, tag_to_ix)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     logger.info(f"***** Initializing Model *****")
-    params = [len(word_to_ix), WORD_EMBEDDING_DIM, HIDDEN_DIM, len(tag_to_ix)]
+    params = [len(word_to_ix), embed_dim, hidden_dim, len(tag_to_ix)]
     taggers = [
         LRTagger(*params[:2], len(tag_to_ix), device=device),
         HMMTagger(len(word_to_ix), len(tag_to_ix)),
         CNNTagger(*params, device=device),
         BiLSTMTagger(*params, device=device),
-        BiLSTMCRFTagger(*params, device=device),
+        BiLSTMCRFTagger(*params, word_to_ix['[PAD]'], device=device),
         BiLSTMAttTagger(*params, word_to_ix['[PAD]'], device=device),
         BiLSTMCNNTagger(*params, device=device),
         CNNBiLSTMTagger(*params, device=device),
@@ -96,14 +98,12 @@ def main():
         taggername = type(tagger).__name__
 
         logger.info(f"***** Loading {taggername} *****")
-        tagger.load(os.path.join(OUTPUT_DIR, f'{taggername}_model.pt'))
+        tagger.load(os.path.join(model_dir, f'{taggername}_model.pt'))
 
         logger.info(f"***** Evaling {taggername} *****")
-        score = evaluate(test_dataset, tagger, device, tag_to_ix)
+        score = evaluate(test_dataset, tagger, device, tag_to_ix, eval_log_dir) 
         results.loc[taggername] = score
     print(results)
-    results.to_csv(os.path.join(EVAL_LOG_DIR, 'total_results.csv'))
+    results.to_csv(os.path.join(eval_log_dir, 'total_results.csv'))
 
 
-if __name__ == "__main__":
-    main()

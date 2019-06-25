@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 .vscode
 .idea
+config.py
 demo.py
 third_party.py
 main.py
@@ -11,9 +12,11 @@ old.bak
 output/
 data/CoNLL-2003
 evallog/
+dict/
 # C extensions
 *.so
-
+*log 
+*out
 # Distribution / packaging
 .Python
 build/

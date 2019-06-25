@@ -1,5 +1,4 @@
 from util import *
-from config import *
 from tagger import *
 
 import os
@@ -10,34 +9,33 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 
-def main():
+def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, lr, batch_size, epochs, print_step, device):
     logger.info(f"***** Loading Training Data *****")
-    train_data = load_data(TRAIN_FILE_NAME)
+    train_data = load_data(train_filename)
 
     logger.info(f"***** Loading Dict *****")
-    word_to_ix, tag_to_ix = load_dict()
+    word_to_ix, tag_to_ix = load_dict(word_dict_path, tag_dict_path)
 
     logger.info(f"***** Generating Training Data *****")
     train_dataset = convert_tokens_to_ids(
-        train_data, MAX_LEN, word_to_ix, tag_to_ix)
+        train_data, max_seq_len, word_to_ix, tag_to_ix)
 
     tag_dim = len(tag_to_ix)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #device = torch.device("cpu")
 
     logger.info(f"***** Initializing Model *****")
-    params = [len(word_to_ix), WORD_EMBEDDING_DIM, HIDDEN_DIM, tag_dim,
-              LEARNING_RATE, BATCH_SIZE, EPOCHS, device, tag_to_ix['[PAD]'], PRINT_STEP]
+    params = [len(word_to_ix), embed_dim, hidden_dim, tag_dim,
+              lr, batch_size, epochs, device, tag_to_ix['[PAD]'], print_step]
+    mask_model_params = [*params[:-1], word_to_ix['[PAD]'], params[-1]]
     taggers = [
         LRTagger(*params[:2], *params[3:]),
         HMMTagger(len(word_to_ix), tag_dim, tag_to_ix['[PAD]']),
         CNNTagger(*params),
         BiLSTMTagger(*params),
-        BiLSTMCRFTagger(*params[:-1], word_to_ix['[PAD]'], params[-1]),
-        BiLSTMAttTagger(*params[:-1], word_to_ix['[PAD]'], params[-1]),
+        BiLSTMCRFTagger(*mask_model_params),
+        BiLSTMAttTagger(*mask_model_params),
         BiLSTMCNNTagger(*params),
         CNNBiLSTMTagger(*params),
-        CNNBiLSTMAttTagger(*params[:-1], word_to_ix['[PAD]'], params[-1])
+        CNNBiLSTMAttTagger(*mask_model_params)
     ]
 
     for tagger in taggers:
@@ -47,8 +45,6 @@ def main():
         tagger.fit(train_dataset[..., 0], train_dataset[..., 1])
 
         logger.info(f"***** Saving {taggername} *****")
-        tagger.save(os.path.join(OUTPUT_DIR, f'{taggername}_model.pt'))
+        tagger.save(os.path.join(ouput_dir, f'{taggername}_model.pt'))
 
 
-if __name__ == "__main__":
-    main()

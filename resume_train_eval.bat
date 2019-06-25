@@ -1,0 +1,3 @@
+python main.py --do_init --train_file=./data/ResumeNER/train.char.bmes --dev_file=./data/ResumeNER/dev.char.bmes --test_file=./data/ResumeNER/test.char.bmes --word_dict_path=./dict/resume_word2ix.dict --tag_dict_path=./dict/resume_tag2ix.dict 
+python main.py --do_train --output_dir=resumeout --train_file=./data/ResumeNER/train.char.bmes --word_dict_path=./dict/resume_word2ix.dict --tag_dict_path=./dict/resume_tag2ix.dict --max_seq_len=180
+python main.py --do_eval --test_file=./data/ResumeNER/test.char.bmes --word_dict_path=./dict/resume_word2ix.dict --tag_dict_path=./dict/resume_tag2ix.dict --output_dir=resumeout --eval_log_dir=resumelog --max_seq_len=180

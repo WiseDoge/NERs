@@ -1,0 +1,3 @@
+python main.py --do_init --train_file=./data/CoNLL2003/train.txt --dev_file=./data/CoNLL2003/dev.txt --test_file=./data/CoNLL2003/test.txt --word_dict_path=./dict/conll_word2ix.dict --tag_dict_path=./dict/conll_tag2ix.dict
+python main.py --do_train --output_dir=conllout --train_file=./data/CoNLL2003/train.txt --word_dict_path=./dict/conll_word2ix.dict --tag_dict_path=./dict/conll_tag2ix.dict --max_seq_len=130
+python main.py --do_eval --test_file=./data/CoNLL2003/test.txt --word_dict_path=./dict/conll_word2ix.dict --tag_dict_path=./dict/conll_tag2ix.dict --output_dir=conllout --eval_log_dir=conlllog --max_seq_len=130

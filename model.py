@@ -1,5 +1,4 @@
 from layer import *
-from third_party import CRF
 
 class BiLSTM(nn.Module):
     def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):

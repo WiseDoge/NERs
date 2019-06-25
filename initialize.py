@@ -13,31 +13,29 @@ def word_tag_to_dict(data, word_to_ix, tag_to_ix):
                 tag_to_ix[word[1]] = len(tag_to_ix)
 
 
-def create_save_dict(datas):
+def create_save_dict(datas, word_dict_path, tag_dict_path):
     word_to_ix, tag_to_ix = {'[PAD]': 0, '[UNK]': 1}, {'[PAD]': 0}
     for data in datas:
         word_tag_to_dict(data, word_to_ix, tag_to_ix)
-    with open(WORD_DICT_PATH, "wb") as f:
+
+    for filename in [word_dict_path, tag_dict_path]:
+        dirname, _ = os.path.split(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+    with open(word_dict_path, "wb") as f:
         pickle.dump(word_to_ix, f)
-    with open(TAG_DICT_PATH, "wb") as f:
+    with open(tag_dict_path, "wb") as f:
         pickle.dump(tag_to_ix, f)
 
 
-def create_output_dir():
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-    if not os.path.exists(EVAL_LOG_DIR):
-        os.makedirs(EVAL_LOG_DIR)
 
-
-def main():
-    create_output_dir()
-    train_data = load_data(TRAIN_FILE_NAME)
-    dev_data = load_data(DEV_FILE_NAME)
-    test_data = load_data(TEST_FILE_NAME)
-    create_save_dict([train_data, dev_data, test_data])
-
-
+def init(train, dev, test, word_dict_path, tag_dict_path):
+    train_data = load_data(train)
+    dev_data = load_data(dev)
+    test_data = load_data(test)
+    create_save_dict([train_data, dev_data, test_data], word_dict_path, tag_dict_path)
 
 if __name__ == "__main__":
-    main()
+    init(TRAIN_FILE_NAME, DEV_FILE_NAME, TEST_FILE_NAME, 
+         WORD_DICT_PATH, TAG_DICT_PATH)

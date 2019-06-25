@@ -2,10 +2,9 @@ from typing import List, Dict, Optional, Tuple, Mapping
 import torch
 import os
 import pickle
-from config import *
 
 
-def load_dict() -> Tuple[Dict[str, int], Dict[str, int]]:
+def load_dict(word2ix_path, tag2ix_path) -> Tuple[Dict[str, int], Dict[str, int]]:
     """Load vocab and tag dict from file.
 
     The type of dict is python dict object.
@@ -13,9 +12,9 @@ def load_dict() -> Tuple[Dict[str, int], Dict[str, int]]:
     Returns:
         vocab dict, tag dict
     """
-    with open(os.path.join(OUTPUT_DIR, 'word_to_ix.dict'), "rb") as f:
+    with open(word2ix_path, "rb") as f:
         word_to_ix = pickle.load(f)
-    with open(os.path.join(OUTPUT_DIR, 'tag_to_ix.dict'), "rb") as f:
+    with open(tag2ix_path, "rb") as f:
         tag_to_ix = pickle.load(f)
     return word_to_ix, tag_to_ix
 
