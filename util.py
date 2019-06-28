@@ -19,7 +19,7 @@ def load_dict(word2ix_path, tag2ix_path) -> Tuple[Dict[str, int], Dict[str, int]
     return word_to_ix, tag_to_ix
 
 
-def load_data(filename:str) -> List[List[str]]:
+def load_data(filename:str, load_tag=True):
     """Load data from file
 
     This function only read the first and last column of input file.
@@ -36,45 +36,39 @@ def load_data(filename:str) -> List[List[str]]:
         sent3word2 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag2
         sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
     """
-    datas = []
-    lst = []
+    seqs = []
+    tags = []
+    seq = []
+    tag = []
     with open(filename, 'r', encoding='utf-8') as f:
         for line in f.readlines():
             if line == '\n':
-                if len(lst) == 0:
+                if len(seq) == 0:
                     continue
-                datas.append(lst)
-                lst = []
+                seqs.append(seq)
+                tags.append(tag)
+                seq = []
+                tag = []
             else:
                 line = line.split()
-                lst.append([line[0], line[-1]])
-    return datas
-
+                seq.append(line[0])
+                tag.append(line[-1])
+    if load_tag:
+        return seqs, tags
+    else:
+        return seqs
 
 def convert_tokens_to_ids(datas:List[List[str]], 
                           maxlen:int, 
-                          word_to_ix:Mapping[str, int], 
-                          tag_to_ix: Optional[Mapping[str, int]]=None) -> torch.LongTensor:
-    if tag_to_ix:
-        dataset = torch.zeros(len(datas), maxlen, 2)
-    else:
-        dataset = torch.zeros(len(datas), maxlen)
+                          token_to_ix:Mapping[str, int]) -> torch.LongTensor:
+    token_ids = torch.ones(len(datas), maxlen) * token_to_ix['[PAD]']
     for (i, line) in enumerate(datas):
         if len(line) > maxlen:
             line = line[:maxlen]
         for j in range(len(line)):
-            word, pos = line[j]
-            if tag_to_ix:
-                dataset[i, j, 0] = word_to_ix[word] if word in word_to_ix else word_to_ix['[UNK]']
-                dataset[i, j, 1] = tag_to_ix[pos]
+            if '[UNK]' in token_to_ix:
+                token_ids[i, j] = token_to_ix.get(line[j], token_to_ix['[UNK]'])
             else:
-                dataset[i, j] = word_to_ix[word]
-        for j in range(len(line), maxlen):
-            if tag_to_ix:
-                dataset[i, j, 0] = word_to_ix['[PAD]']
-                dataset[i, j, 1] = tag_to_ix['[PAD]']
-            else:
-                dataset[i, j] = word_to_ix['[PAD]']
-    return dataset.long()
-
+                token_ids[i, j] = token_to_ix[line[j]]
+    return token_ids.long()
 

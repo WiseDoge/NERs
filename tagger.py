@@ -72,47 +72,50 @@ class TorchTagger(object):
     def load(self, filename: str):
         self.model.load_state_dict(torch.load(filename))
 
-
-class TorchAttTagger(TorchTagger):
+class TorchMaskTagger(TorchTagger):
     def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
         self.pad_index = pad_index
-
-    def creat_attention_mask(self, X):
+        self.ignore_index = ignore_index
+    
+    def creat_mask(self, X, dtype):
         """
         if sent = [I have a dream], max_len = 8, then
         mask = [1 1 1 1 0 0 0 0]
         :param X: shape=[len, max_len]
         :return:
         """
-        att_mask = torch.ones(X.shape)
+        att_mask = torch.ones(X.shape, dtype=dtype)
         att_mask[X == self.pad_index] = 0
-        return att_mask.byte()
+        return att_mask
+
+class TorchAttTagger(TorchMaskTagger):
+    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
+        super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
 
     def create_input_dataset(self, X, y):
-        input_mask = self.creat_attention_mask(X)
+        input_mask = self.creat_mask(X, dtype=torch.float)
         return TensorDataset(X, input_mask, y)
 
     def score(self, X, softmax=False):
         self.model.to(self.device)
         self.model.eval()
-        att_mask = self.creat_attention_mask(X).to(self.device)
+        att_mask = self.creat_mask(X, dtype=torch.float).to(self.device)
         with torch.no_grad():
             logits = self.model(X, att_mask)
         return F.softmax(logits, dim=-1) if softmax else logits
 
 
-class TorchCRFTagger(TorchAttTagger):
+class TorchCRFTagger(TorchMaskTagger):
     def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
-        self.ignore_index = ignore_index
 
     def compute_loss(self, batch: Tuple[torch.Tensor, torch.Tensor, torch.ByteTensor]):
         loss = self.model(*batch)
         return loss
 
     def create_input_dataset(self, X, y):
-        input_mask = self.creat_attention_mask(X)
+        input_mask = self.creat_mask(X, dtype=torch.uint8)
         return TensorDataset(X, y, input_mask)
 
     def predict(self, X, with_padding=True):
@@ -128,7 +131,7 @@ class TorchCRFTagger(TorchAttTagger):
     def score(self, X):
         self.model.to(self.device)
         self.model.eval()
-        crf_mask = self.creat_attention_mask(X).to(self.device)
+        crf_mask = self.creat_mask(X, dtype=torch.uint8).to(self.device)
         with torch.no_grad():
             paths = self.model.decode(X, crf_mask)
         return paths

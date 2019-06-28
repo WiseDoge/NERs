@@ -11,15 +11,14 @@ logger = logging.getLogger(__name__)
 
 def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, lr, batch_size, epochs, print_step, device):
     logger.info(f"***** Loading Training Data *****")
-    train_data = load_data(train_filename)
+    train_seqs, train_tags = load_data(train_filename, load_tag=True)
 
     logger.info(f"***** Loading Dict *****")
     word_to_ix, tag_to_ix = load_dict(word_dict_path, tag_dict_path)
 
     logger.info(f"***** Generating Training Data *****")
-    train_dataset = convert_tokens_to_ids(
-        train_data, max_seq_len, word_to_ix, tag_to_ix)
-
+    train_seqs = convert_tokens_to_ids(train_seqs, max_seq_len, word_to_ix)
+    train_tags = convert_tokens_to_ids(train_tags, max_seq_len, tag_to_ix)
     tag_dim = len(tag_to_ix)
 
     logger.info(f"***** Initializing Model *****")
@@ -42,7 +41,7 @@ def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_l
         taggername = type(tagger).__name__
 
         logger.info(f"***** Training {taggername} *****")
-        tagger.fit(train_dataset[..., 0], train_dataset[..., 1])
+        tagger.fit(train_seqs, train_tags)
 
         logger.info(f"***** Saving {taggername} *****")
         tagger.save(os.path.join(ouput_dir, f'{taggername}_model.pt'))
