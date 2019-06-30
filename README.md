@@ -67,6 +67,22 @@ sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
 本项目只会读取第一列（句子）和最后一列（NER标注）。
 
 ## Usage
+先到 `train.py` 选择要训练的模型。
+```python
+# train.py 第 28 行
+# 对于不需要训练的模型，将其对应的行注释掉即可
+taggers = [
+        LRTagger(*params[:2], *params[3:]),
+        HMMTagger(len(word_to_ix), tag_dim, tag_to_ix['[PAD]']),
+        CNNTagger(*params),
+        BiLSTMTagger(*params),
+        BiLSTMCRFTagger(*mask_model_params),
+        BiLSTMAttTagger(*mask_model_params),
+        BiLSTMCNNTagger(*params),
+        CNNBiLSTMTagger(*params),
+        CNNBiLSTMAttTagger(*mask_model_params)
+    ]
+```
 
 ### 在中文简历数据上进行训练和评估（此脚本 Windows/Linux 通用）  
 ```$ resume_train_eval.bat``` 
@@ -84,7 +100,7 @@ sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
 标 `*` 的位置需要用户自行指定。
 
 ## Results
-评估的方法是对每一种标签分别求P，R，F1，然后再求加权平均。
+评估的方法是对每一种标签分别求 **P**、**R**和**F1**，然后再求加权平均（`O` 标记也计算在内），评估的结果保存在 `--eval_log_dir` 目录。每一个模型都有三个输出文件：各类别的PRF1，混淆矩阵表格和混淆矩阵图。除此之外还会输出一个总的表格，表格内汇总了各模型的加权PRF1。
 ### Chinese Resume Data
 |                      | Precision | Recall | F1-Score |
 | -------------------- | --------- | ------ | -------- |
@@ -110,6 +126,11 @@ sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
 | CNNBiLSTMTagger    | 0.9191    | 0.9217 | 0.9196   |
 | CNNBiLSTMAttTagger | 0.9164    | 0.9206 | 0.9176   |
 
+## Using Docker
+1. Pull image  
+```$ docker pull wisedoge/ners```
+2. Run  
+```$ docker run -it wisedoge/ners```
 
 ## TODO
 * 增加 Ensemble。
