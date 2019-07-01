@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class TorchTagger(object):
+    """scikit-learn style model.
+
+    This class is the base class of all tagger class implemented by PyTorch.
+    """
     def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
         self.model = model
         self.batch_size = batch_size
@@ -24,11 +28,18 @@ class TorchTagger(object):
         return TensorDataset(X, y)
 
     def compute_loss(self, batch: Tuple):
+        """Forward and compute loss.
+        """
         tag_ids = batch[-1]
         logits = self.model(*batch[:-1])
         return self.loss_fct(logits.view(-1, self.model.tag_dim), tag_ids.view(-1))
 
     def fit(self, X, y):
+        """Fit model.
+        Args:
+            X: input seqs, shape=(dataset_size, max_seq_len).
+            y: tags, shape=(dataset_size, max_seq_len).
+        """
         self.model.to(self.device)
         self.model.train()
 
@@ -56,10 +67,18 @@ class TorchTagger(object):
         return F.softmax(logits, dim=-1) if softmax else logits
 
     def predict(self, X):
+        """Predict batch.
+        Args:
+            X: shape=(batch_size, max_seq_len)
+        """
         scores = self.score(X)
         return scores.argmax(dim=-1)
 
     def predict_one(self, X):
+        """Predict a single seq.
+        Args:
+            X: shape=(max_seq_len, )
+        """
         X = X.unsqueeze(0)
         return self.predict(X).squeeze()
 
