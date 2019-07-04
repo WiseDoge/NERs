@@ -7,7 +7,6 @@ __pycache__/
 config.py
 demo.py
 third_party.py
-main.py
 old.bak
 output/
 data/CoNLL-2003
