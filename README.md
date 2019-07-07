@@ -74,7 +74,7 @@ sent3word3 [sent1word1 attr1] ... [sent1word1 attr_n] sent3tag3
 taggers = [
         LRTagger(*params[:2], *params[3:]),
         HMMTagger(len(word_to_ix), tag_dim, tag_to_ix['[PAD]']),
-        CNNTagger(*params),
+        CNNTagger(*params[:3], max_seq_len, *params[3:]),
         BiLSTMTagger(*params),
         BiLSTMCRFTagger(*mask_model_params),
         BiLSTMAttTagger(*mask_model_params),
@@ -82,55 +82,53 @@ taggers = [
         CNNBiLSTMTagger(*params),
         CNNBiLSTMAttTagger(*mask_model_params)
     ]
-```
+```    
 
-### 在中文简历数据上进行训练和评估（此脚本 Windows/Linux 通用）  
+* 在中文简历数据上进行训练和评估（此脚本 Windows/Linux 通用）  
 ```$ resume_train_eval.bat``` 
-### 在 CoNLL 2003 数据上进行训练和评估（此脚本 Windows/Linux 通用）  
+* 在 CoNLL 2003 数据上进行训练和评估（此脚本 Windows/Linux 通用）  
 ```$ conll_train_eval.bat``` 
-### 在自己的数据集上进行训练和评估  
-* 生成词表   
+* 在自己的数据集上进行训练和评估
+    * 生成词表   
 ```python main.py --do_init --train_file=* --dev_file=* --test_file=* --word_dict_path=* --tag_dict_path=*```
-* 训练  
+    * 训练  
 ```python main.py --do_train --output_dir=* --train_file=* --word_dict_path=* --tag_dict_path=*```  
 亦可自行指定学习率、epochs等参数。 
-* 评估  
+    * 评估  
 ```python main.py --do_eval --test_file=* --word_dict_path=* --tag_dict_path=* --output_dir=* --eval_log_dir=*```  
-  
-标 `*` 的位置需要用户自行指定。
 
-## Results
-评估的方法是对每一种标签分别求 **P**、**R**和**F1**，然后再求加权平均（`O` 标记也计算在内），评估的结果保存在 `--eval_log_dir` 目录。每一个模型都有三个输出文件：各类别的PRF1，混淆矩阵表格和混淆矩阵图。除此之外还会输出一个总的表格，表格内汇总了各模型的加权PRF1。
-### Chinese Resume Data
-|                      | Precision | Recall | F1-Score |
-| -------------------- | --------- | ------ | -------- |
-| Logistic Regression  | 0.7544    | 0.7634 | 0.7557   |
-| HMM                  | 0.9207    | 0.9015 | 0.9095   |
-| CNN                  | 0.9160    | 0.9158 | 0.9153   |
-| BiLSTM               | 0.9546    | 0.9544 | 0.9542   |
-| BiLSTM+Attention     | 0.9578    | 0.9577 | 0.9576   |
-| BiLSTM+CNN           | 0.9571    | 0.957  | 0.9569   |
-| CNN+BiLSTM           | 0.9584    | 0.9583 | 0.9579   |
-| CNN+BiLSTM+Attention | 0.9615    | 0.9613 | 0.9612   |
-| BiLSTM+CRF           | 0.9573    | 0.9572 | 0.9569   |
-### CoNLL2003 
-|                    | Precision | Recall | F1-Score |
-| ------------------ | --------- | ------ | -------- |
-| LRTagger           | 0.8865    | 0.8759 | 0.8803   |
-| HMMTagger          | 0.9547    | 0.7362 | 0.8231   |
-| CNNTagger          | 0.9111    | 0.9139 | 0.9119   |
-| BiLSTMTagger       | 0.9218    | 0.9236 | 0.922    |
-| BiLSTMCRFTagger    | 0.9209    | 0.9202 | 0.9202   |
-| BiLSTMAttTagger    | 0.9233    | 0.9279 | 0.9239   |
-| BiLSTMCNNTagger    | 0.9255    | 0.9286 | 0.9264   |
-| CNNBiLSTMTagger    | 0.9191    | 0.9217 | 0.9196   |
-| CNNBiLSTMAttTagger | 0.9164    | 0.9206 | 0.9176   |
+    注：标 `*` 的位置需要用户自行指定。
 
-## Using Docker
+## Training in Docker
 1. Pull image  
 ```$ docker pull wisedoge/ners```
 2. Run  
 ```$ docker run -it wisedoge/ners```
 
-## TODO
-* 增加 Ensemble。
+## Results
+评估的方法是对每一种标签分别求 **P**、**R**和**F1**，然后再求加权平均（`O` 标记也计算在内），评估的结果保存在 `--eval_log_dir` 目录。每一个模型都有三个输出文件：各类别的PRF1，混淆矩阵表格和混淆矩阵图。除此之外还会输出一个总的表格，表格内汇总了各模型的加权PRF1。
+### Chinese Resume Data
+|              | Precision | Recall | F1-Score |
+| ------------ | --------- | ------ | -------- |
+| LR           | 0.7578    | 0.7625 | 0.7568   |
+| HMM          | 0.9207    | 0.9015 | 0.9095   |
+| CNN          | 0.9161    | 0.9140 | 0.9144   |
+| BiLSTM       | 0.9539    | 0.9537 | 0.9535   |
+| BiLSTMCRF    | 0.9581    | 0.9579 | 0.9578   |
+| BiLSTMAtt    | 0.9587    | 0.9583 | 0.9583   |
+| BiLSTMCNN    | 0.9564    | 0.9565 | 0.9563   |
+| CNNBiLSTM    | 0.9564    | 0.9562 | 0.9560   |
+| CNNBiLSTMAtt | 0.9611    | 0.9611 | 0.9609   |
+### CoNLL2003 
+| Unnamed: 0   | Precision | Recall | F1-Score |
+| ------------ | --------- | ------ | -------- |
+| LR           | 0.8844    | 0.8732 | 0.8778   |
+| HMM          | 0.9543    | 0.7338 | 0.8211   |
+| CNN          | 0.9136    | 0.9184 | 0.9148   |
+| BiLSTM       | 0.9203    | 0.9196 | 0.9192   |
+| BiLSTMCRF    | 0.9199    | 0.9226 | 0.9205   |
+| BiLSTMAtt    | 0.9213    | 0.9243 | 0.9216   |
+| BiLSTMCNN    | 0.9215    | 0.9255 | 0.9226   |
+| CNNBiLSTM    | 0.9157    | 0.9188 | 0.9165   |
+| CNNBiLSTMAtt | 0.9151    | 0.9191 | 0.9162   |
+
