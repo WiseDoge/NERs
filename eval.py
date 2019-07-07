@@ -87,7 +87,7 @@ def do_eval(test_filename, word_dict_path, tag_dict_path, max_seq_len, embed_dim
     taggers = [
         LRTagger(*params[:2], len(tag_to_ix), device=device),
         HMMTagger(len(word_to_ix), len(tag_to_ix)),
-        CNNTagger(*params, device=device),
+        CNNTagger(*params[:3], max_seq_len, *params[3:], device=device),
         BiLSTMTagger(*params, device=device),
         BiLSTMCRFTagger(*params, word_to_ix['[PAD]'], device=device),
         BiLSTMAttTagger(*params, word_to_ix['[PAD]'], device=device),
@@ -105,7 +105,7 @@ def do_eval(test_filename, word_dict_path, tag_dict_path, max_seq_len, embed_dim
 
         logger.info(f"***** Evaling {taggername} *****")
         score = evaluate(test_seqs, test_tags, tagger, device, tag_to_ix, eval_log_dir) 
-        results.loc[taggername] = score
+        results.loc[taggername.replace("Tagger", "")] = score
     print(results)
     results.to_csv(os.path.join(eval_log_dir, 'total_results.csv'))
 

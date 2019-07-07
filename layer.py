@@ -6,6 +6,27 @@ import torch.nn.functional as F
 
 import math
 
+class PositionalEncoding(nn.Module):
+    "Implement the PE function."
+    def __init__(self, d_model, max_len, dropout=0.2):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+        
+        # Compute the positional encodings once in log space.
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len).unsqueeze(1).float()
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() *
+                             -(math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)
+        pe.requires_grad = False
+        self.pe = pe
+        
+    def forward(self, x):
+        x = x + self.pe[:, :x.size(1)].to(x.device)
+        return self.dropout(x)
+
 
 class BiLSTMLayer(nn.Module):
     """Bi-LSTM layer.
@@ -53,7 +74,7 @@ class LayerNorm(nn.Module):
 
 
 class SelfAttentionLayer(nn.Module):
-    def __init__(self, hidden_dim: int, num_heads: Optional[int] = 4, dropout_prob: Optional[float] = 0.2):
+    def __init__(self, hidden_dim: int, num_heads: Optional[int] = 4, dropout: Optional[float] = 0.2):
         super().__init__()
         self.num_att_heads = num_heads
         self.att_head_size = hidden_dim // num_heads
@@ -63,7 +84,7 @@ class SelfAttentionLayer(nn.Module):
         self.key = nn.Linear(hidden_dim, self.all_head_size)
         self.value = nn.Linear(hidden_dim, self.all_head_size)
 
-        self.dropout = nn.Dropout(dropout_prob)
+        self.dropout = nn.Dropout(dropout)
 
     def transpose_for_scores(self, x):
         # x.shape=(batch_size, max_seq_len, all_head_size<hidden_dim>)
@@ -138,12 +159,12 @@ class CRFLayer(nn.Module):
     This module implements a conditional random field by pytorch.
     """
 
-    def __init__(self, num_tags: int):
+    def __init__(self, tag_size: int):
         super().__init__()
-        self.num_tags = num_tags
-        self.start_trans = nn.Parameter(torch.empty(num_tags))
-        self.end_trans = nn.Parameter(torch.empty(num_tags))
-        self.trans = nn.Parameter(torch.empty(num_tags, num_tags))
+        self.tag_size = tag_size
+        self.start_trans = nn.Parameter(torch.empty(tag_size))
+        self.end_trans = nn.Parameter(torch.empty(tag_size))
+        self.trans = nn.Parameter(torch.empty(tag_size, tag_size))
         self.reset_parameters()
 
     def reset_parameters(self) -> None:

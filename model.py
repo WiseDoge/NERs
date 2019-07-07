@@ -1,12 +1,15 @@
 from layer import *
+import torch 
+import torch.nn as nn
+import math
 
 class BiLSTM(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
+        self.tag_size = tag_size
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -15,14 +18,14 @@ class BiLSTM(nn.Module):
 
 
 class BiLSTMCRF(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
-        self.crf = CRFLayer(tag_dim)
-        #self.crf = CRF(tag_dim, True)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.crf = CRFLayer(tag_size)
+        #self.crf = CRF(tag_size, True)
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
+        self.tag_size = tag_size
     
     def forward(self, x, tags, crf_mask=None):
         embeds = self.embedding(x)
@@ -38,13 +41,13 @@ class BiLSTMCRF(nn.Module):
 
 
 class BiLSTMAtt(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
         self.att = SelfAttentionLayer(hidden_dim)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
+        self.tag_size = tag_size
         self.norm = LayerNorm(hidden_dim)
 
     def forward(self, x, attention_mask):
@@ -55,27 +58,30 @@ class BiLSTMAtt(nn.Module):
 
 
 class CNN(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, max_seq_len, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
+        self.pos_encoder = PositionalEncoding(embed_dim, max_seq_len)
         self.conv = CNNLayer(embed_dim, hidden_dim)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
+        self.embed_dim = embed_dim
+        self.tag_size = tag_size
 
     def forward(self, x):
-        embeds = self.embedding(x)
+        embeds = self.embedding(x) * math.sqrt(self.embed_dim)
+        embeds = self.pos_encoder(embeds)
         cnn_out = self.conv(embeds)
         return self.hidden2tag(cnn_out)
 
 
 class BiLSTMCNN(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
         self.conv = CNNLayer(hidden_dim, hidden_dim)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
+        self.tag_size = tag_size
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -85,13 +91,13 @@ class BiLSTMCNN(nn.Module):
 
 
 class CNNBiLSTM(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
         self.conv = CNNLayer(embed_dim, hidden_dim)
         self.bilstm = BiLSTMLayer(hidden_dim, hidden_dim)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
+        self.tag_size = tag_size
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -101,15 +107,15 @@ class CNNBiLSTM(nn.Module):
 
 
 class CNNBiLSTMAtt(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, hidden_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(vocab, embed_dim)
         self.conv = CNNLayer(embed_dim, hidden_dim)
         self.bilstm = BiLSTMLayer(hidden_dim, hidden_dim)
-        self.hidden2tag = nn.Linear(hidden_dim, tag_dim)
+        self.hidden2tag = nn.Linear(hidden_dim, tag_size)
         self.att = SelfAttentionLayer(hidden_dim)
         self.norm = LayerNorm(hidden_dim)
-        self.tag_dim = tag_dim
+        self.tag_size = tag_size
 
     def forward(self, x, attention_mask):
         embeds = self.embedding(x)
@@ -120,11 +126,11 @@ class CNNBiLSTMAtt(nn.Module):
 
 
 class LogisticRegression(nn.Module):
-    def __init__(self, vocab_size:int, embed_dim:int, tag_dim:int):
+    def __init__(self, vocab:int, embed_dim:int, tag_size:int):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
-        self.hidden2tag = nn.Linear(embed_dim, tag_dim)
-        self.tag_dim = tag_dim
+        self.embedding = nn.Embedding(vocab, embed_dim)
+        self.hidden2tag = nn.Linear(embed_dim, tag_size)
+        self.tag_size = tag_size
 
     def forward(self, x):
         embeds = self.embedding(x)

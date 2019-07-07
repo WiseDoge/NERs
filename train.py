@@ -28,7 +28,7 @@ def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_l
     taggers = [
         LRTagger(*params[:2], *params[3:]),
         HMMTagger(len(word_to_ix), tag_dim, tag_to_ix['[PAD]']),
-        CNNTagger(*params),
+        CNNTagger(*params[:3], max_seq_len, *params[3:]),
         BiLSTMTagger(*params),
         BiLSTMCRFTagger(*mask_model_params),
         BiLSTMAttTagger(*mask_model_params),

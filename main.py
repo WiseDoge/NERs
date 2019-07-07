@@ -32,7 +32,7 @@ def get_args():
     
 
     parser.add_argument("--batch_size", type=int, default=64)
-    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--max_seq_len", type=int, default=100)
     parser.add_argument("--embed_dim", type=int, default=128)
     parser.add_argument("--hidden_dim", type=int, default=256)
