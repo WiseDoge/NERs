@@ -46,7 +46,6 @@ def confu_matrix(y_true, pred_tags, labels, fname_nosuf):
 
 def evaluate(seqs, tags, tagger, device, tag_to_ix, eval_log_dir):
     taggername = type(tagger).__name__
-    logger.info(f"***** Evaluating {taggername} *****")
     ix_to_tag = {v: k for k, v in tag_to_ix.items()}
     input_ids = seqs.to(device)
     tag_ids = tags.to(device)

@@ -110,7 +110,7 @@ class TorchMaskTagger(TorchTagger):
 
 class TorchAttTagger(TorchMaskTagger):
     def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
-        super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
+        super().__init__(model, lr, batch_size, epochs, device, ignore_index, pad_index, print_step)
 
     def create_input_dataset(self, X, y):
         input_mask = self.creat_mask(X, dtype=torch.float)
@@ -127,7 +127,7 @@ class TorchAttTagger(TorchMaskTagger):
 
 class TorchCRFTagger(TorchMaskTagger):
     def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
-        super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
+        super().__init__(model, lr, batch_size, epochs, device, ignore_index, pad_index, print_step)
 
     def compute_loss(self, batch: Tuple[torch.Tensor, torch.Tensor, torch.ByteTensor]):
         loss = self.model(*batch)
@@ -157,61 +157,61 @@ class TorchCRFTagger(TorchMaskTagger):
 
 
 class LRTagger(TorchTagger):
-    def __init__(self, vocab, embed_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
-        model = LogisticRegression(vocab, embed_dim, tag_dim)
+        model = LogisticRegression(vocab, embed_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
 
 
 class BiLSTMTagger(TorchTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
-        model = BiLSTM(vocab, embed_dim, hidden_dim, tag_dim)
+        model = BiLSTM(vocab, embed_dim, hidden_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
 
 
 class BiLSTMCRFTagger(TorchCRFTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
-        model = BiLSTMCRF(vocab, embed_dim, hidden_dim, tag_dim)
+        model = BiLSTMCRF(vocab, embed_dim, hidden_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs,
                          device, ignore_index, pad_index, print_step)
 
 
 class BiLSTMAttTagger(TorchAttTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
-        model = BiLSTMAtt(vocab, embed_dim, hidden_dim, tag_dim)
+        model = BiLSTMAtt(vocab, embed_dim, hidden_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs,
                          device, ignore_index, pad_index, print_step)
 
 
 class CNNTagger(TorchTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, max_seq_len, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, max_seq_len, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
-        model = CNN(vocab, embed_dim, hidden_dim, max_seq_len, tag_dim)
+        model = CNN(vocab, embed_dim, hidden_dim, max_seq_len, tag_size)
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
 
 
 class BiLSTMCNNTagger(TorchTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
-        model = BiLSTMCNN(vocab, embed_dim, hidden_dim, tag_dim)
+        model = BiLSTMCNN(vocab, embed_dim, hidden_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
 
 
 class CNNBiLSTMAttTagger(TorchAttTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
-        model = CNNBiLSTMAtt(vocab, embed_dim, hidden_dim, tag_dim)
+        model = CNNBiLSTMAtt(vocab, embed_dim, hidden_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs,
                          device, ignore_index, pad_index, print_step)
 
 
 class CNNBiLSTMTagger(TorchTagger):
-    def __init__(self, vocab, embed_dim, hidden_dim, tag_dim,
+    def __init__(self, vocab, embed_dim, hidden_dim, tag_size,
                  lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
-        model = CNNBiLSTM(vocab, embed_dim, hidden_dim, tag_dim)
+        model = CNNBiLSTM(vocab, embed_dim, hidden_dim, tag_size)
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
 
 
