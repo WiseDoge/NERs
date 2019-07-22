@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Tuple
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from .model import *
@@ -15,6 +15,7 @@ class TorchTagger(object):
 
     This class is the base class of all tagger class implemented by PyTorch.
     """
+
     def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, print_step=5):
         self.model = model
         self.batch_size = batch_size
@@ -91,25 +92,29 @@ class TorchTagger(object):
     def load(self, filename: str):
         self.model.load_state_dict(torch.load(filename))
 
+
 class TorchMaskTagger(TorchTagger):
-    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
+    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0,
+                 print_step=5):
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, print_step)
         self.pad_index = pad_index
         self.ignore_index = ignore_index
-    
+
     def creat_mask(self, X, dtype):
         """
         if sent = [I have a dream], max_len = 8, then
-        mask = [1 1 1 1 0 0 0 0]
-        :param X: shape=[len, max_len]
-        :return:
+        mask = [1 1 1 1 0 0 0 0].
+        Args:
+            X: shape=[len, max_len].
         """
         att_mask = torch.ones(X.shape, dtype=dtype)
         att_mask[X == self.pad_index] = 0
         return att_mask
 
+
 class TorchAttTagger(TorchMaskTagger):
-    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
+    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0,
+                 print_step=5):
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, pad_index, print_step)
 
     def create_input_dataset(self, X, y):
@@ -126,7 +131,8 @@ class TorchAttTagger(TorchMaskTagger):
 
 
 class TorchCRFTagger(TorchMaskTagger):
-    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0, print_step=5):
+    def __init__(self, model, lr=0.01, batch_size=32, epochs=5, device='cpu', ignore_index=0, pad_index=0,
+                 print_step=5):
         super().__init__(model, lr, batch_size, epochs, device, ignore_index, pad_index, print_step)
 
     def compute_loss(self, batch: Tuple[torch.Tensor, torch.Tensor, torch.ByteTensor]):

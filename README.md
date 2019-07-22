@@ -2,7 +2,7 @@
 Some basic NER algorithms common in both Chinese and English.
 ## Dependencies
 * Python 3.6+
-* PyTorch 0.4+
+* PyTorch 1.0+
 * NumPy
 * Pandas  （友好显示表格数据）
 * Matplotlib （画混淆矩阵）

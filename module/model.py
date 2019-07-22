@@ -1,10 +1,10 @@
 from .layer import *
-import torch 
 import torch.nn as nn
 import math
 
+
 class BiLSTM(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
@@ -18,21 +18,21 @@ class BiLSTM(nn.Module):
 
 
 class BiLSTMCRF(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
         self.crf = CRFLayer(tag_size)
-        #self.crf = CRF(tag_size, True)
+        # self.crf = CRF(tag_size, True)
         self.hidden2tag = nn.Linear(hidden_dim, tag_size)
         self.tag_size = tag_size
-    
+
     def forward(self, x, tags, crf_mask=None):
         embeds = self.embedding(x)
         lstm_out, _ = self.bilstm(embeds)
         emis = self.hidden2tag(lstm_out)
         return self.crf(emis, tags, crf_mask)
-    
+
     def decode(self, x, crf_mask=None):
         embeds = self.embedding(x)
         lstm_out, _ = self.bilstm(embeds)
@@ -41,7 +41,7 @@ class BiLSTMCRF(nn.Module):
 
 
 class BiLSTMAtt(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
@@ -58,7 +58,7 @@ class BiLSTMAtt(nn.Module):
 
 
 class CNN(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, max_seq_len, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, max_seq_len, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.pos_encoder = PositionalEncoding(embed_dim, max_seq_len)
@@ -75,7 +75,7 @@ class CNN(nn.Module):
 
 
 class BiLSTMCNN(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.bilstm = BiLSTMLayer(embed_dim, hidden_dim)
@@ -91,7 +91,7 @@ class BiLSTMCNN(nn.Module):
 
 
 class CNNBiLSTM(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.conv = CNNLayer(embed_dim, hidden_dim)
@@ -107,7 +107,7 @@ class CNNBiLSTM(nn.Module):
 
 
 class CNNBiLSTMAtt(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, hidden_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, hidden_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.conv = CNNLayer(embed_dim, hidden_dim)
@@ -126,7 +126,7 @@ class CNNBiLSTMAtt(nn.Module):
 
 
 class LogisticRegression(nn.Module):
-    def __init__(self, vocab:int, embed_dim:int, tag_size:int):
+    def __init__(self, vocab: int, embed_dim: int, tag_size: int):
         super().__init__()
         self.embedding = nn.Embedding(vocab, embed_dim)
         self.hidden2tag = nn.Linear(embed_dim, tag_size)
@@ -135,4 +135,3 @@ class LogisticRegression(nn.Module):
     def forward(self, x):
         embeds = self.embedding(x)
         return self.hidden2tag(embeds)
-

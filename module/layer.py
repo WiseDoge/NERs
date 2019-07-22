@@ -6,12 +6,14 @@ import torch.nn.functional as F
 
 import math
 
+
 class PositionalEncoding(nn.Module):
     "Implement the PE function."
+
     def __init__(self, d_model, max_len, dropout=0.2):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
-        
+
         # Compute the positional encodings once in log space.
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len).unsqueeze(1).float()
@@ -22,7 +24,7 @@ class PositionalEncoding(nn.Module):
         pe = pe.unsqueeze(0)
         pe.requires_grad = False
         self.pe = pe
-        
+
     def forward(self, x):
         x = x + self.pe[:, :x.size(1)].to(x.device)
         return self.dropout(x)
@@ -33,6 +35,7 @@ class BiLSTMLayer(nn.Module):
 
     This module implements a Bi-LSTM layer.  
     """
+
     def __init__(self, input_dim: int, hidden_dim: int):
         super().__init__()
         self.bilstm = nn.LSTM(input_dim, hidden_dim // 2,
@@ -148,13 +151,13 @@ class SelfAttentionLayer(nn.Module):
         context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
         # new_context_layer_shape=(batch_size, max_seq_len, all_head_size)
         new_context_layer_shape = context_layer.size()[
-            :-2] + (self.all_head_size,)
+                                  :-2] + (self.all_head_size,)
         context_layer = context_layer.view(*new_context_layer_shape)
         return context_layer
 
 
 class CRFLayer(nn.Module):
-# class CRFLayer(torch.jit.ScriptModule):
+    # class CRFLayer(torch.jit.ScriptModule):
 
     """Conditional random field(CRF) layer.
 
@@ -232,8 +235,8 @@ class CRFLayer(nn.Module):
         # shape = (batch_size, )
 
         score = self.start_trans[tags[:, 0]] + \
-            emis[torch.arange(batch_size), 0, tags[:, 0]]
-        #print(score.shape)
+                emis[torch.arange(batch_size), 0, tags[:, 0]]
+        # print(score.shape)
         for i in range(1, seq_length):
             trans_score = self.trans[tags[:, i - 1], tags[:, i]] * mask[:, i]
             emiss_score = emis[torch.arange(

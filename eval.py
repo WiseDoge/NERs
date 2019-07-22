@@ -40,7 +40,7 @@ def confu_matrix(y_true, pred_tags, labels, fname_nosuf):
     ax.set_xlabel("Predict Labels", fontsize=12)
     ax.set_ylabel("True Labels", fontsize=12)
     plt.savefig(fname_nosuf + '.png', dpi=300)
-    data.rename(columns={'[PAD]':'Predict'},  index={'[PAD]': 'True'}, inplace=True)
+    data.rename(columns={'[PAD]': 'Predict'}, index={'[PAD]': 'True'}, inplace=True)
     data.to_csv(fname_nosuf + '.csv')
 
 
@@ -71,7 +71,8 @@ def evaluate(seqs, tags, tagger, device, tag_to_ix, eval_log_dir):
     return df.loc['Mean/Total'][:-1]
 
 
-def do_eval(test_filename, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, model_dir, eval_log_dir, device):
+def do_eval(test_filename, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, model_dir, eval_log_dir,
+            device):
     logger.info(f"***** Loading Eval Data *****")
     test_seqs, test_tags = load_data(test_filename, load_tag=True)
     word_to_ix, tag_to_ix = load_dict(word_dict_path, tag_dict_path)
@@ -103,9 +104,7 @@ def do_eval(test_filename, word_dict_path, tag_dict_path, max_seq_len, embed_dim
         tagger.load(os.path.join(model_dir, f'{taggername}_model.pt'))
 
         logger.info(f"***** Evaling {taggername} *****")
-        score = evaluate(test_seqs, test_tags, tagger, device, tag_to_ix, eval_log_dir) 
+        score = evaluate(test_seqs, test_tags, tagger, device, tag_to_ix, eval_log_dir)
         results.loc[taggername.replace("Tagger", "")] = score
     print(results)
     results.to_csv(os.path.join(eval_log_dir, 'total_results.csv'))
-
-

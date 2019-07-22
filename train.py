@@ -9,7 +9,8 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 
-def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, lr, batch_size, epochs, print_step, device):
+def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_len, embed_dim, hidden_dim, lr,
+             batch_size, epochs, print_step, device):
     logger.info(f"***** Loading Training Data *****")
     train_seqs, train_tags = load_data(train_filename, load_tag=True)
 
@@ -45,5 +46,3 @@ def do_train(train_filename, ouput_dir, word_dict_path, tag_dict_path, max_seq_l
 
         logger.info(f"***** Saving {taggername} *****")
         tagger.save(os.path.join(ouput_dir, f'{taggername}_model.pt'))
-
-

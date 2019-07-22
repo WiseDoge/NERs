@@ -1,6 +1,5 @@
-from typing import List, Dict, Optional, Tuple, Mapping
+from typing import List, Dict, Tuple, Mapping
 import torch
-import os
 import pickle
 
 
@@ -19,7 +18,7 @@ def load_dict(word2ix_path, tag2ix_path) -> Tuple[Dict[str, int], Dict[str, int]
     return word_to_ix, tag_to_ix
 
 
-def load_data(filename:str, load_tag=True):
+def load_data(filename: str, load_tag=True):
     """Load data from file
 
     This function only read the first and last column of input file.
@@ -58,10 +57,11 @@ def load_data(filename:str, load_tag=True):
     else:
         return seqs
 
-def convert_tokens_to_ids(datas:List[List[str]], 
-                          maxlen:int, 
-                          token_to_ix:Mapping[str, int]) -> torch.LongTensor:
-    token_ids = torch.ones(len(datas), maxlen) * token_to_ix['[PAD]']
+
+def convert_tokens_to_ids(datas: List[List[str]],
+                          maxlen: int,
+                          token_to_ix: Mapping[str, int]) -> torch.LongTensor:
+    token_ids = torch.ones(len(datas), maxlen, dtype=torch.long) * token_to_ix['[PAD]']
     for (i, line) in enumerate(datas):
         if len(line) > maxlen:
             line = line[:maxlen]
@@ -70,5 +70,4 @@ def convert_tokens_to_ids(datas:List[List[str]],
                 token_ids[i, j] = token_to_ix.get(line[j], token_to_ix['[UNK]'])
             else:
                 token_ids[i, j] = token_to_ix[line[j]]
-    return token_ids.long()
-
+    return token_ids
