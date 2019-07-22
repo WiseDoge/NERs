@@ -132,3 +132,6 @@ taggers = [
 | CNNBiLSTM    | 0.9157    | 0.9188 | 0.9165   |
 | CNNBiLSTMAtt | 0.9151    | 0.9191 | 0.9162   |
 
+## References
+* Self-Attention 层和 LayerNorm 层的设计参考了 [pytorch-transformers](https://github.com/huggingface/pytorch-transformers)。
+* CRF 层的设计参考了AllenNLP。

@@ -1,4 +1,4 @@
-from layer import *
+from .layer import *
 import torch 
 import torch.nn as nn
 import math

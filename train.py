@@ -1,5 +1,5 @@
 from util import *
-from tagger import *
+from module.tagger import *
 
 import os
 import logging

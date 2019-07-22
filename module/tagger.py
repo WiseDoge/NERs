@@ -1,7 +1,7 @@
 from typing import Tuple, Optional
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from model import *
+from .model import *
 import os
 import logging
 

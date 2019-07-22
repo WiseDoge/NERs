@@ -1,4 +1,4 @@
-from tagger import *
+from module.tagger import *
 from util import *
 import pandas as pd
 import matplotlib.pyplot as plt

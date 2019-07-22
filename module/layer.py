@@ -154,6 +154,8 @@ class SelfAttentionLayer(nn.Module):
 
 
 class CRFLayer(nn.Module):
+# class CRFLayer(torch.jit.ScriptModule):
+
     """Conditional random field(CRF) layer.
 
     This module implements a conditional random field by pytorch.
@@ -195,12 +197,13 @@ class CRFLayer(nn.Module):
         denominator = self.compute_normalizer(emis, mask)
         # shape: (batch_size,)
         nll = denominator - numerator
-        if reduction == 'none':
-            return nll
-        if reduction == 'sum':
-            return nll.sum()
-        if reduction == 'mean':
-            return nll.mean()
+        return nll.sum()
+        # if reduction == 'none':
+        #     return nll
+        # if reduction == 'sum':
+        #     return nll.sum()
+        # if reduction == 'mean':
+        #     return nll.mean()
 
     def decode(self, emis, mask) -> List[List[int]]:
         """Decode seqs, only use in test time.
