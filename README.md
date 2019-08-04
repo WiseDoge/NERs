@@ -1,5 +1,5 @@
 # NERs
-Some basic NER algorithms common in both Chinese and English.
+Some basic NER algorithms implemented by PyTorch. 
 ## Dependencies
 * Python 3.6+
 * PyTorch 1.0+
